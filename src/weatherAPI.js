@@ -131,8 +131,11 @@ const successCallback = async (position) => {
     const processedData = processJSON(data);
     display(processedData);
 };
-const errorCallback = (error) => {
-    console.log(error);
+const errorCallback = async (error) => {
+    console.error(error);
+    const data = await fetchWeatherData();
+    const processedData = processJSON(data);
+    display(processedData);
 };
 navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
 
