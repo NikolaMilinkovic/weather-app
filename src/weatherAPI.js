@@ -3,12 +3,24 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/en';
 
 // Cache each element on the page
-const city = document.getElementById('city');
-const country = document.getElementById('country');
-const localTime = document.getElementById('local-time');
-const temperature = document.getElementById('temperature');
-const feelsLike = document.getElementById('feels-like');
-const inputField = document.getElementById('input-city');
+let city = document.getElementById('city');
+let country = document.getElementById('country');
+let weekday = document.getElementById('weekday');
+let temperature = document.getElementById('temperature');
+let feelsLike = document.getElementById('feels-like');
+let weatherImg = document.getElementById('weather-img');
+let weatherText = document.getElementById('weather-text');
+const getElements = () => {
+    city = document.getElementById('city');
+    country = document.getElementById('country');
+    weekday = document.getElementById('weekday');
+    temperature = document.getElementById('temperature');
+    feelsLike = document.getElementById('feels-like');
+    weatherImg = document.getElementById('weather-img');
+    weatherText = document.getElementById('weather-text');
+};
+
+let inputField = document.getElementById('input-city');
 // Innitialize required values
 let inputData = '';
 let latitude = '';
@@ -18,6 +30,7 @@ let responseData = '';
 
 // Method for taking user input
 const getCity = () => {
+    inputField = document.getElementById('input-city');
     inputData = inputField.value;
 };
 const clearField = () => {
@@ -29,16 +42,17 @@ const fetchWeatherData = async () => {
     try {
         if (inputData === '' && latitude !== '' && longitude !== '') {
             console.log('Running coords');
-            response = await fetch('https://api.weatherapi.com/v1/forecast.json?key=5335746e216d497981b153233242601&q=' + `${latitude}` + ',' + `${longitude}` + '&days=14&aqi=no&alerts=no', { mode: 'cors' });
+            response = await fetch('https://api.weatherapi.com/v1/forecast.json?key=5335746e216d497981b153233242601&q=' + `${latitude}` + ',' + `${longitude}` + '&days=8&aqi=no&alerts=no', { mode: 'cors' });
         } else if (inputData !== '') {
             console.log('Running inputData !== empty');
-            response = await fetch('https://api.weatherapi.com/v1/forecast.json?key=5335746e216d497981b153233242601&q=' + `${inputData}` + '&days=14&aqi=no&alerts=no', { mode: 'cors' });
+            response = await fetch('https://api.weatherapi.com/v1/forecast.json?key=5335746e216d497981b153233242601&q=' + `${inputData}` + '&days=8&aqi=no&alerts=no', { mode: 'cors' });
         } else {
             console.log('Running else statement');
-            response = await fetch('https://api.weatherapi.com/v1/forecast.json?key=5335746e216d497981b153233242601&q=Zemun&days=14&aqi=no&alerts=no', { mode: 'cors' });
+            response = await fetch('https://api.weatherapi.com/v1/forecast.json?key=5335746e216d497981b153233242601&q=Zemun&days=8&aqi=no&alerts=no', { mode: 'cors' });
         }
 
         const awaitJSON = await response.json();
+        console.log(awaitJSON);
         return awaitJSON;
     } catch (error) {
         console.error(`Oops! Something went wrong.. ${error}`);
@@ -56,6 +70,8 @@ const processJSON = (JSON) => {
         feelsLikeF: fetchedData.current.feelslike_f,
         temperatureC: fetchedData.current.temp_c,
         temperatureF: fetchedData.current.temp_f,
+        text: fetchedData.current.condition.text,
+        img: fetchedData.current.condition.icon,
         forecast: fetchedData.forecast.forecastday
             .map((day) => ({
                 date: day.date,
@@ -76,14 +92,13 @@ const displayWeeklyForcast = (JSONdata) => {
         div.setAttribute('class', 'forecast-div');
 
         const weekday = document.createElement('para');
-        const date = document.createElement('para');
         const avgTempC = document.createElement('para');
+        avgTempC.setAttribute('class', 'temperature');
         const condition = document.createElement('para');
+        condition.setAttribute('class', 'condition');
         const icon = document.createElement('img');
 
-        weekday.innerHTML = `${dayjs(day.date).locale('en').format('dddd')}`;
-        date.innerHTML = `${dayjs(displayData.localTime).format('DD MMMM YYYY')}`;
-        console.log(day.avgTempC);
+        weekday.innerHTML = `${dayjs(day.date).locale('en').format('ddd')}`;
         avgTempC.innerHTML = `${day.avgTempC}°`;
         condition.innerHTML = day.text;
         const imgPath = day.icon;
@@ -91,7 +106,6 @@ const displayWeeklyForcast = (JSONdata) => {
         icon.setAttribute('class', 'forecast-img');
 
         div.appendChild(weekday);
-        div.appendChild(date);
         div.appendChild(avgTempC);
         div.appendChild(condition);
         div.appendChild(icon);
@@ -107,17 +121,20 @@ const removeForecastData = () => {
     divElement.innerHTML = '';
 };
 
-// Method for displaying the data on the screen
+// Method for displaying the weather data
 const display = (JSONdata) => {
     const displayData = JSONdata;
     removeForecastData();
+    getElements();
+
 
     city.innerHTML = displayData.city;
     country.innerHTML = displayData.country;
-    localTime.innerHTML = `${dayjs(displayData.localTime).locale('en').format('dddd')}<br>`
-    + `${dayjs(displayData.localTime).format('DD MMMM YYYY')}`;
+    weekday.innerHTML = `${dayjs(displayData.localTime).locale('en').format('dddd')}`;
     temperature.innerHTML = `Temperature: ${displayData.temperatureC}°`;
     feelsLike.innerHTML = `Feels like: ${displayData.feelsLikeC}°`;
+    weatherImg.src = displayData.img;
+    weatherText.innerHTML = displayData.text;
     displayWeeklyForcast(displayData);
 };
 

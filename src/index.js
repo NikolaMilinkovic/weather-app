@@ -1,9 +1,8 @@
 import './style.css';
-import runCitySearch from './weatherAPI';
+import displayNavbar from './navbar';
+import displayWeatherToday from './dataDisplay';
+import displayFooter from './footer';
 
-
-// Btn logic
-const searchBtn = document.getElementById('btn-search');
-searchBtn.addEventListener('click', async () => {
-    runCitySearch();
-});
+displayNavbar();
+displayWeatherToday();
+displayFooter();
